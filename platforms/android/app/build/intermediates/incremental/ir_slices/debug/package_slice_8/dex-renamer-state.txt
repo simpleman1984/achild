@@ -1,0 +1,4 @@
+#Mon Jun 11 14:38:25 CST 2018
+base.0=/sourcecode/xuah_git/achild/platforms/android/app/build/intermediates/transforms/dexMerger/debug/8
+path.0=classes.dex
+renamed.0=classes.dex

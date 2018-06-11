@@ -1,10 +1,10 @@
 {
     "logs": [
         {
-            "outputFile": "/sourcecode/xuah_git/agirl/platforms/android/app/build/intermediates/incremental/mergeDebugResources/merged.dir/values/values.xml",
+            "outputFile": "/sourcecode/xuah_git/achild/platforms/android/app/build/intermediates/incremental/mergeDebugResources/merged.dir/values/values.xml",
             "map": [
                 {
-                    "source": "/sourcecode/xuah_git/agirl/platforms/android/app/src/main/res/values/strings.xml",
+                    "source": "/sourcecode/xuah_git/achild/platforms/android/app/src/main/res/values/strings.xml",
                     "from": {
                         "startLines": "4,2,3",
                         "startColumns": "4,4,4",
