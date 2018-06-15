@@ -250,7 +250,6 @@ export default {
 
   #d31 {
     height: calc(100vh - 60px);
-    background-color: white;
     vertical-align: bottom;
     cursor:none;
 
