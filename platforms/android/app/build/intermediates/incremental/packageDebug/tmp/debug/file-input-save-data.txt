@@ -1,21 +1,21 @@
 #Internal package file, do not edit.
-#Mon Jun 11 15:00:12 CST 2018
+#Fri Jun 15 20:28:32 CST 2018
 4.path=www/cordova-js-src/android/promptbasednativeapi.js
 13.baseType=DIRECTORY
 8.set=ASSET
-6.path=www/static/js/app.cce7a04d02e8d2f4cfaa.js
+6.path=www/static/js/vendor.5f148af0eb0387359466.js
 0.baseType=DIRECTORY
-10.path=www/static/css/app.b5404eae47d434f9967efb9d561ceeb5.css
+10.path=www/cordova-js-src/platform.js
 5.baseType=DIRECTORY
 1.base=/sourcecode/xuah_git/achild/platforms/android/app/build/intermediates/assets/debug
-8.path=www/cordova-js-src/platform.js
-12.path=www/static/js/vendor.75447677aaa6f3cd1c03.js.map
+8.path=www/static/css/app.977e2b4fd1910f1be5af2d72bbe5f3f7.css
+12.path=www/static/js/manifest.66e476e5be74446d5492.js
 3.base=/sourcecode/xuah_git/achild/platforms/android/app/build/intermediates/assets/debug
-14.path=www/index.html
+14.path=www/static/js/app.db6df45e3ae66caac247.js.map
 15.set=ASSET
 4.set=ASSET
 5.base=/sourcecode/xuah_git/achild/platforms/android/app/build/intermediates/assets/debug
-16.path=www/static/js/manifest.2222cb01cd744a7102c0.js.map
+16.path=www/cordova.js
 7.base=/sourcecode/xuah_git/achild/platforms/android/app/build/intermediates/assets/debug
 11.base=/sourcecode/xuah_git/achild/platforms/android/app/build/intermediates/assets/debug
 9.base=/sourcecode/xuah_git/achild/platforms/android/app/build/intermediates/assets/debug
@@ -32,21 +32,21 @@
 2.baseType=DIRECTORY
 10.baseType=DIRECTORY
 15.baseType=DIRECTORY
-1.path=www/static/css/app.b5404eae47d434f9967efb9d561ceeb5.css.map
+1.path=www/static/js/manifest.66e476e5be74446d5492.js.map
 7.baseType=DIRECTORY
-3.path=www/static/js/manifest.2222cb01cd744a7102c0.js
+3.path=www/static/js/vendor.5f148af0eb0387359466.js.map
 10.set=ASSET
 5.path=www/cordova_plugins.js
 0.base=/sourcecode/xuah_git/achild/platforms/android/app/build/intermediates/transforms/dexMerger/debug/0
-7.path=www/static/js/app.cce7a04d02e8d2f4cfaa.js.map
-11.path=www/static/js/vendor.75447677aaa6f3cd1c03.js
-9.path=www/cordova-js-src/exec.js
+7.path=www/static/js/app.db6df45e3ae66caac247.js
+11.path=www/cordova-js-src/exec.js
+9.path=www/static/css/app.977e2b4fd1910f1be5af2d72bbe5f3f7.css.map
 6.set=ASSET
 2.base=/sourcecode/xuah_git/achild/platforms/android/app/build/intermediates/assets/debug
 13.path=www/cordova-js-src/android/nativeapiprovider.js
 11.baseType=DIRECTORY
 4.base=/sourcecode/xuah_git/achild/platforms/android/app/build/intermediates/assets/debug
-15.path=www/cordova.js
+15.path=www/index.html
 3.baseType=DIRECTORY
 6.base=/sourcecode/xuah_git/achild/platforms/android/app/build/intermediates/assets/debug
 16.baseType=DIRECTORY

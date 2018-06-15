@@ -152,6 +152,12 @@ class Draw {
       }
     }
   }
+  drawBgcolor (bgColor) {
+    let ctx = this.ctx
+    let c = this.c
+    ctx.fillStyle = bgColor
+    ctx.fillRect(0, 0, c.width, c.height)
+  }
 
   draw (item, i) {
     this.ctx.lineCap = 'round'
@@ -182,6 +188,43 @@ class Draw {
       this.ctx.stroke()
       this.ctx.closePath()
     }
+  }
+
+  drawText (txt, color) {
+    let ctx = this.ctx
+    ctx.font = '250px Arial'
+    ctx.lineWidth = 2.0
+    // ctx.fillText(txt, 10, 200)
+    // ctx.strokeText(txt, 10, 200)
+    ctx.fillStyle = color || 'red'
+    ctx.textAlign = 'center'
+    ctx.strokeStyle = color || 'red'
+    ctx.strokeText(txt, this.c.width / 2, this.c.height / 2)
+  }
+
+  drawImage () {
+    let image = new Image()
+    image.src = 'http://seopic.699pic.com/photo/00013/6254.jpg_wh1200.jpg'
+    image.onload = () => {
+      this.ctx.drawImage(image, 100, 100, 100, 100)
+    }
+
+    // var URL = window.URL;
+    // var url = URL.createObjectURL(e.target.files[0]);
+    // img.src = url;
+    //
+    // img.onload = function() {
+    //   var canvas = document.getElementById("myCanvas");
+    //   var ctx = canvas.getContext("2d");
+    //
+    //   ctx.clearRect(0, 0, canvas.width, canvas.height);
+    //   ctx.drawImage(img, 0, 0, 500, 500);
+    // }});
+  }
+  clearRect () {
+    let ctx = this.ctx
+    let c = this.c
+    ctx.clearRect(0, 0, c.width, c.height)
   }
 }
 export default Draw

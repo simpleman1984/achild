@@ -2,6 +2,14 @@
   <div class="app-wrapper">
     <canvas id="canvas" ref="canvas"></canvas>
     <div class="cursor" id="cursor"></div>
+    <div class="tap-btn" @mouseover="showOp = true" @mouseleave="showOp = false">
+      <span>...</span>
+      <ul v-show="showOp">
+        <li @click="editMode = 'random'">随便画</li>
+        <li @click="editMode = 'digital';_drawNumber()">数字</li>
+        <li @click="editMode = 'letter';_drawLetter()">字母</li>
+      </ul>
+    </div>
     <b-container class="bv-example-row">
       <b-row>
         <b-col>
@@ -68,10 +76,16 @@
               <label class="color-item">
                 <span v-bind:class="'color color-' + colorItem"
                       v-bind:style="{backgroundColor: colorItem}"
-                      v-on:click="color=colorItem;popups.showColor = !popups.showColor"></span>
+                      v-on:click="color=colorItem;"></span>
               </label>
             </b-dropdown-item>
           </b-dropdown>
+          <!-- 背景颜色 -->
+          <div class="btn-group" >
+            <i class="ion ion-android-color-palette" @click="popups.showColor = !popups.showColor">
+            </i>
+            <chrome-picker v-click-outside="hide" v-model="bgColor" v-if="popups.showColor" style="position: absolute;bottom: 20px;"></chrome-picker>
+          </div>
         </b-col>
       </b-row>
     </b-container>
@@ -80,21 +94,56 @@
 
 <script>
 import Draw from './js/CanvasDraw'
+import randomstring from 'randomstring'
+import randomcolor from 'randomcolor'
+import { Chrome } from 'vue-color'
+import ClickOutside from 'vue-click-outside'
+
+// https://www.npmjs.com/package/recordrtc
+// import RecordRTC from 'recordrtc'
 
 var draw
 export default {
   name: 'hello',
+  components: {
+    'chrome-picker': Chrome
+  },
+  directives: {
+    ClickOutside
+  },
   mounted () {
     this.showCanvas()
+
+    // navigator.getUserMedia({ audio: true, video: true }, // { width: 1280, height: 720 }
+    //   (stream) => {
+    //     var options = {
+    //       mimeType: 'video/webm', // or video/webm\;codecs=h264 or video/webm\;codecs=vp9
+    //       audioBitsPerSecond: 128000,
+    //       videoBitsPerSecond: 128000,
+    //       bitsPerSecond: 128000 // if this line is provided, skip above two
+    //     }
+    //     var audioRecorder = RecordRTC(stream, options)
+    //     audioRecorder.startRecording()
+    //     setTimeout(() => {
+    //       audioRecorder.stopRecording(function (audioVideoWebMURL) {
+    //         window.open(audioVideoWebMURL)
+    //       })
+    //     }, 10000)
+    //   }, (err) => {
+    //     console.log('The following error occurred: ' + err.name)
+    //   })
   },
   data () {
     return {
+      showOp: false,
+      editMode: 'letter', // digital random letter
       options: {
         restrictY: false,
         restrictX: false
       },
       history: [],
       color: '#13c5f7',
+      bgColor: '#efefef',
       size: 12,
       popups: {
         showColor: false,
@@ -126,21 +175,54 @@ export default {
         '#f7e013',
         '#000000'
       ],
+      bgColors: [
+        '#efefef'
+      ],
       sizes: [6, 12, 24],
       weights: [2, 4, 6]
     }
   },
   methods: {
+    hide () {
+      this.popups.showColor = false
+    },
     showCanvas () {
       draw = new Draw(this.$refs.canvas, this)
+      draw.drawText('1')
+      draw.drawImage()
     },
     removeHistoryItem () {
       this.history.splice(this.history.length - 2, 1)
       draw.redraw()
     },
+    _drawNumber () {
+      draw.clearRect()
+      let digtalstr = randomstring.generate({
+        length: 4,
+        charset: 'numeric'
+      })
+      draw.drawText(digtalstr)
+    },
+    _drawLetter () {
+      draw.clearRect()
+      draw.drawBgcolor(this.bgColor)
+      let digtalstr = randomstring.generate({
+        length: 4,
+        charset: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+      })
+      let color = randomcolor()
+      console.info('1________', color)
+      draw.drawText(digtalstr, color)
+    },
     removeAllHistory () {
       this.history = []
       draw.redraw()
+
+      if (this.editMode === 'digital') {
+        this._drawNumber()
+      } else if (this.editMode === 'letter') {
+        this._drawLetter()
+      }
     },
     simplify () {
       var simpleHistory = []
@@ -204,6 +286,46 @@ export default {
 
 $prim: rgb(0, 149, 255);
 
+/**
+ * 超级按钮
+ */
+.tap-btn
+{
+  list-style: none;
+  position: absolute;
+  left: 30px;
+  top: 30px;
+
+  span {
+    display:block;
+    width: 30px;
+    height: 30px;
+    border-radius: 30px;
+    background-color: aquamarine;
+  }
+
+  ul {
+    margin: 0px;
+    padding: 0px;
+  }
+
+  li {
+    cursor:pointer;
+    margin: 0px;
+    padding: 0px;
+    /*以上三行实现自适应start*/
+    text-align: center;/*设置对齐方式*/
+    /*float:left;*/
+    /*以上三行实现自适应end*/
+    list-style-type:none;/*去掉li的消圆点*/
+    /*display: inline;*/
+  }
+
+  li:hover {
+    background-color: blueviolet;
+  }
+}
+
 .text-faded {
   opacity: 0.5;
 }
@@ -257,19 +379,19 @@ canvas {
 		width: 0;
 		height: 0;
 	}
-	
+
 	input:checked + .color {
 		opacity: 1;
 		border: 2px solid $prim;
 	}
-	
+
 	.color {
 		display: block;
 		width: 20px;
 		height: 20px;
 		background-color: white;
 		border-radius: 50%;
-		
+
 		&:hover {
 			opacity: .8;
 		}
@@ -285,7 +407,7 @@ canvas {
 	align-items: center;
 	vertical-align: top;
 	cursor: pointer;
-	
+
 	input {
 		position: absolute;
 		top: 0;
@@ -294,7 +416,7 @@ canvas {
 		height: 0;
 		opacity: 0;
 	}
-	
+
 	.size {
 		background-color: rgb(140, 140, 140);
 		display: inline-block;
@@ -304,12 +426,12 @@ canvas {
 		position: absolute;
 		top: 50%;
 		left: 50%;
-		
+
 		&:hover {
 			opacity: .8;
 		}
 	}
-	
+
 	.size.checked {
 		background-color: $prim;
 	}
