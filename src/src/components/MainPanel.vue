@@ -1,7 +1,7 @@
 <template>
   <div class="app-wrapper">
     <d3-draw ref="draw" :fontColor="fontColor" :lineWidth="lineWidth" :bgColor="bgColor"></d3-draw>
-    <div class="tap-btn" @mouseover="showOp = true" @mouseleave="showOp = false">
+    <div class="tap-btn" @mouseover="showOp = true" @mouseleave="showOp = false" >
       <span>...</span>
       <ul v-show="showOp">
         <li @click="editMode = 'random'">随便画</li>
@@ -12,6 +12,7 @@
     <b-container class="bv-example-row">
       <b-row>
         <b-col>
+          <button @mousedown="startRecord" @mouseup="endRecord">录</button>
           <!-- 曲线数字 -->
           <b-badge variant="light">
             {{ history.length }}
@@ -45,7 +46,10 @@
   import ColorLinePicker from '../common/picker/color_line_picker'
   import ColorChromePicker from '../common/picker/color_chrome_picker'
   import randomstring from 'randomstring'
+  import audio from './js/audio.js'
+  import RecordRTC from 'recordrtc'
 
+  let audioRecorder
   export default {
     components: {
       D3Draw,
@@ -74,6 +78,8 @@
         let instance = this.$refs.draw.getInstance()
         instance.changeFontColor(val)
       }
+    },
+    mounted () {
     },
     methods: {
       removeAllHistory () {
@@ -114,8 +120,46 @@
         let instance = this.$refs.draw.getInstance()
         let contentWidth = instance.getContentWidth()
         let centerPoint = instance.getCenterPoint()
-        console.info('中心点', centerPoint)
-        instance.drawText(text, centerPoint, 0.8 * contentWidth)
+        let txt = instance.drawText(text, centerPoint, 0.8 * contentWidth)
+        txt.on('click', function () {
+          audio.play(text)
+          txt.transition()
+            .style('fill', 'red')
+            .transition()
+            .delay(800)
+            .style('fill', 'none')
+        })
+      },
+      startRecord () {
+        navigator.getUserMedia({ audio: true, video: false }, // { width: 1280, height: 720 }
+          (stream) => {
+            var options = {
+              type: 'pcm',
+              recorderType: RecordRTC.StereoAudioRecorder,
+              // mimeType: 'audio/wav', // or video/webm\;codecs=h264 or video/webm\;codecs=vp9
+              audioBitsPerSecond: 16000,
+              // videoBitsPerSecond: 128000,
+              numberOfAudioChannels: 1,
+              // sampleRate: 16000,
+              desiredSampleRate: 16000,
+              ignoreMutedMedia: true
+              // bitsPerSecond: 128000 // if this line is provided, skip above two
+            }
+            audioRecorder = RecordRTC(stream, options)
+            audioRecorder.startRecording()
+          }, (err) => {
+            console.log('The following error occurred: ' + err.name)
+          })
+      },
+      endRecord () {
+        audioRecorder.stopRecording(function (audioVideoWebMURL) {
+          window.open(audioVideoWebMURL)
+          // const data = new FormData()
+          // data.append('action', 'ADD')
+          // data.append('file', audioVideoWebMURL, { type: 'audio/wav' })
+          let data = {filename: 'xxx'}
+          audio.upload(data, audioRecorder.getBlob())
+        })
       }
     }
   }

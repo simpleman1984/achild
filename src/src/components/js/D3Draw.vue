@@ -136,7 +136,7 @@ class Draw {
     }
   }
   drawText (text, center, width, styles = {stroke: 'black'}) {
-    this.svg.selectAll()
+    return this.svg.selectAll()
       .data([text])
       .enter()
       .append('text')
