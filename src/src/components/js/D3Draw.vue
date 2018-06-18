@@ -1,6 +1,7 @@
 <template>
   <div>
-    <div id="d31" @touchstart="mousedown" @touchmove="mousemove" @touchend="mouseup" @mousedown="mousedown" @mousemove="mousemove" @mouseup="mouseup"></div>
+    <!--<div id="d31" @touchstart="mousedown" @touchmove="mousemove" @touchend="mouseup" @mousedown="mousedown" @mousemove="mousemove" @mouseup="mouseup"></div>-->
+    <div id="d31"></div>
     <div class="cursor" id="cursor"></div>
   </div>
 </template>
@@ -8,7 +9,9 @@
 import * as d3 from 'd3'
 
 class Draw {
-  constructor (container, app) {
+  constructor (container, context) {
+    // 设置上下文
+    this.ctx = context
     this.page = 1
     this.pages = 1
     this.history = []
@@ -25,11 +28,14 @@ class Draw {
     let svg = d3Dom.append('svg')
       .attr('width', window.innerWidth)
       .attr('height', window.innerHeight - 60)
+      .attr('id', 'svg_' + container)
     this.svg = svg
     // 初始化背景色
     this.initBgColor()
     // 初始化围墙线
     this.initLineRect()
+    // 初始化拖拉事件
+    this.initDragEvent()
     // let canvas = this.svg.append('canvas')
     // canvas.attr('width', window.innerWidth)
     // canvas.attr('height', window.innerHeight - 60)
@@ -89,11 +95,69 @@ class Draw {
     this.drawLine({x: line1.x1, y: line1.y1}, {x: line1.x2, y: line1.y2}, {stroke: 'black'})
     this.drawLine({x: line2.x1, y: line2.y1}, {x: line2.x2, y: line2.y2}, {stroke: 'black'})
   }
+  initDragEvent () {
+    var line = d3.line().curve(d3.curveBasis)
+    let dragstarted = () => {
+      var d = d3.event.subject
+      var x0 = d3.event.x
+      var y0 = d3.event.y
+      // settings from UI
+      var active = this.svg.append('path').datum(d)
+      this.history.push(active)
+      d3.event
+        .on('drag', () => {
+          var x1 = d3.event.x
+          var y1 = d3.event.y
+          var dx = x1 - x0
+          var dy = y1 - y0
+          var cursor = document.getElementById('cursor')
+          cursor.style.transform = `translate(${x1 - 10}px, ${y1 - 10}px)`
+          if (dx * dx + dy * dy > 36) {
+            d.push([x0 = x1, y0 = y1])
+          } else {
+            d[d.length - 1] = [x1, y1]
+          }
+          active.attr('d', line)
+            .style('stroke-width', this.lineWidth + 'px')
+            .style('stroke', this.fontColor)
+            .style('fill', 'none')
+            // .style('stroke', '#000')
+            .style('stroke-linejoin', 'round')
+            .style('stroke-linecap', 'round')
+          this.updateHistory()
+        })
+        .on('end', () => {
+          this.history.push(active)
+        })
+    }
+    d3.select('svg')
+      .on('mousemove', () => {
+        var x1 = d3.event.x
+        var y1 = d3.event.y
+        var cursor = document.getElementById('cursor')
+        cursor.style.transform = `translate(${x1 - 10}px, ${y1 - 10}px)`
+      })
+      .call(d3.drag()
+        .container(function () {
+          return this
+        })
+        .subject(function () {
+          var p = [d3.event.x, d3.event.y]
+          return [p, p]
+        })
+        .on('start', dragstarted))
+  }
+  getHistory () {
+    return this.history
+  }
   getContentWidth () {
     return this.contentWidth
   }
   getCenterPoint () {
     return this.centerPoint
+  }
+  updateHistory () {
+    this.ctx.$emit('history:update')
   }
   undo () {
     // 历史大于0，才能够撤销
@@ -101,13 +165,19 @@ class Draw {
       this.history[this.history.length - 1].remove()
       this.history.splice(this.history.length - 1, 1)
     }
+    this.updateHistory()
   }
   clearHistory () {
     this.history = []
     this.svg.selectAll('*').remove()
+    this.updateHistory()
   }
   changeFontColor (color) {
     this.fontColor = color
+  }
+  // 变更字都默认颜色
+  changeLineWidth (lineWidth) {
+    this.lineWidth = lineWidth
   }
   // 变更背景
   changeBgColor (bgColor) {
@@ -149,38 +219,8 @@ class Draw {
       .attr('stroke-width', 1)
       .attr('fill', 'none')
       .text(function (d) {
-        console.info('____')
         return d
       })
-  }
-  startAction (action, x, y, params) {
-    if (params) {
-      this.lineWidth = params.lineWidth || 12
-      this.bgColor = params.bgColor || '#efefef'
-      this.fontColor = params.fontColor || 'black'
-    }
-    this.currentAction = this.svg.append(action)
-    this.currentActionHistory = [{x: x, y: y}]
-  }
-  doingAction (x, y) {
-    this.currentActionHistory.push({x: x, y: y})
-    let lineFunction = d3.line()
-      .x(function (d) { return d.x })
-      .y(function (d) { return d.y })
-    let currentAction = this.currentAction
-    if (currentAction) {
-      currentAction
-        .attr('d', lineFunction(this.currentActionHistory))
-        .attr('stroke', this.fontColor)
-        .attr('stroke-width', this.lineWidth)
-        .attr('fill', 'none')
-    }
-  }
-  endAction () {
-    // 更新历史(历史直接保存的为svg对象，更合理的应该为会话规则！！！！)
-    this.history.push(this.currentAction)
-    this.currentAction = null
-    this.currentPathHistory = []
   }
   // 获取基本宽度等属性
   getRect () {
@@ -192,7 +232,6 @@ class Draw {
 }
 
 let draw
-let isDrawing
 export default {
   props: {
     fontColor: String,
@@ -201,33 +240,14 @@ export default {
     editMode: String // digital random letter
   },
   mounted () {
-    draw = new Draw('#d31')
+    draw = new Draw('#d31', this)
+    draw.changeFontColor(this.fontColor)
+    draw.changeLineWidth(this.lineWidth)
+    draw.changeBgColor(this.bgColor)
   },
   methods: {
     getInstance () {
       return draw
-    },
-    mousedown (e) {
-      let clientX = e.offsetX || e.touches[0].clientX
-      let clientY = e.offsetY || e.touches[0].clientY
-      isDrawing = true
-      draw.startAction('path', clientX, clientY, {
-        lineWidth: this.lineWidth,
-        fontColor: this.fontColor
-      })
-    },
-    mousemove (e) {
-      let clientX = e.offsetX || e.touches[0].clientX
-      let clientY = e.offsetY || e.touches[0].clientY
-      var cursor = document.getElementById('cursor')
-      cursor.style.transform = `translate(${clientX - 10}px, ${clientY - 20}px)`
-      if (isDrawing) {
-        draw.doingAction(clientX, clientY)
-      }
-    },
-    mouseup () {
-      isDrawing = false
-      draw.endAction()
     }
   }
 }

@@ -1,10 +1,10 @@
 <template>
   <div class="app-wrapper">
-    <d3-draw ref="draw" :fontColor="fontColor" :lineWidth="lineWidth" :bgColor="bgColor"></d3-draw>
+    <d3-draw ref="draw" :fontColor="fontColor" :lineWidth="lineWidth" :bgColor="bgColor" v-on:history:update="updateHistory()"></d3-draw>
     <div class="tap-btn" @mouseover="showOp = true" @mouseleave="showOp = false" >
       <span>...</span>
       <ul v-show="showOp">
-        <li @click="editMode = 'random'">随便画</li>
+        <li @click="editMode = 'random';removeAllHistory()">随便画</li>
         <li @click="editMode = 'digital';removeAllHistory()">数字</li>
         <li @click="editMode = 'letter';removeAllHistory()">字母</li>
       </ul>
@@ -13,28 +13,20 @@
       <b-row>
         <b-col>
           <button @mousedown="startRecord" @mouseup="endRecord">录</button>
-          <!-- 曲线数字 -->
-          <b-badge variant="light">
-            {{ history.length }}
-          </b-badge>
           <!-- 撤销 -->
-          <button type="button"
-                  v-on:click="removeHistoryItem"
-                  v-bind:class="{ disabled: !history.length }" title="Undo">
-            <i class="ion ion-reply"></i>
+          <button type="button" v-on:click="removeHistoryItem" v-bind:class="{active: historyLength > 0}" title="Undo">
+            <i class="ion ion-reply" ></i>
           </button>
           <!-- 清空 -->
-          <button type="button"
-                  v-on:click="removeAllHistory"
-                  v-bind:class="{ disabled: !history.length }" title="Clear all">
-            <i class="ion ion-trash-a"></i>
+          <button type="button" v-on:click="removeAllHistory" v-bind:class="{active: historyLength > 0}" title="Clear all">
+            <i class="ion ion-trash-a" ></i>
           </button>
-          <!-- 画线粗细 -->
-          <circle-line-picker v-model="lineWidth"></circle-line-picker>
           <!-- 颜色 -->
           <color-chrome-picker v-model="fontColor"></color-chrome-picker>
           <!-- 背景颜色 -->
           <color-line-picker v-model="bgColor"></color-line-picker>
+          <!-- 画线粗细 -->
+          <circle-line-picker v-model="lineWidth"></circle-line-picker>
         </b-col>
       </b-row>
     </b-container>
@@ -48,6 +40,7 @@
   import randomstring from 'randomstring'
   import audio from './js/audio.js'
   import RecordRTC from 'recordrtc'
+  import saveSvgAsPng from 'save-svg-as-png'
 
   let audioRecorder
   export default {
@@ -60,8 +53,9 @@
     data () {
       return {
         showOp: false,
-        editMode: 'letter', // digital random letter
-        history: [],
+        editMode: 'random', // digital random letter
+        // 当前会话历史数量
+        historyLength: 0,
         // 当前会话的状态
         fontColor: '#13c5f7',
         bgColor: '#efefef',
@@ -77,32 +71,49 @@
         console.info(val)
         let instance = this.$refs.draw.getInstance()
         instance.changeFontColor(val)
+      },
+      lineWidth (val) {
+        let instance = this.$refs.draw.getInstance()
+        instance.changeLineWidth(val)
       }
     },
     mounted () {
     },
     methods: {
+      updateHistory () {
+        if (!this.$refs.draw) {
+          this.historyLength = 0
+        }
+        this.historyLength = this.$refs.draw.getInstance().getHistory().length
+      },
       removeAllHistory () {
-        let instance = this.$refs.draw.getInstance()
-        instance.clearHistory()
-        // 初始化
-        instance.initBgColor()
-        instance.initLineRect()
-        let str
-        if (this.editMode === 'letter') {
-          str = randomstring.generate({
-            length: 4,
-            charset: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
-          })
-        } else if (this.editMode === 'digital') {
-          str = randomstring.generate({
-            length: 4,
-            charset: 'numeric'
-          })
-        }
-        if (str) {
-          this._drawLetter(str)
-        }
+        // 保存当前图片,然后再清空历史
+        saveSvgAsPng.svgAsPngUri(document.getElementById('svg_#d31'), {}, (uri) => {
+          saveSvgAsPng.download('test.png', uri)
+          let instance = this.$refs.draw.getInstance()
+          instance.clearHistory()
+          // 初始化
+          instance.initBgColor()
+          instance.initLineRect()
+          let str
+          let hasLetter
+          if (this.editMode === 'letter') {
+            str = randomstring.generate({
+              length: 4,
+              charset: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+            })
+            hasLetter = true
+          } else if (this.editMode === 'digital') {
+            str = randomstring.generate({
+              length: 4,
+              charset: 'numeric'
+            })
+            hasLetter = true
+          }
+          if (str && hasLetter) {
+            this._drawLetter(str)
+          }
+        })
       },
       removeHistoryItem () {
         let instance = this.$refs.draw.getInstance()
@@ -237,7 +248,7 @@
 
     &:active,
     &.active {
-      color: white;
+      color: black;
     }
 
     &.disabled {

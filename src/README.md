@@ -1,3 +1,10 @@
+参考地址：
+https://www.cnblogs.com/yaoyinglong/p/drag.html
+https://bl.ocks.org/mbostock/4198499
+http://bl.ocks.org/WilliamQLiu/76ae20060e19bf42d774
+https://github.com/exupero/saveSvgAsPng
+
+
 ./ffmpeg -i a9427d44-4765-4e78-940b-bf4eb32f83e5.wav -acodec pcm_s16le -ar 16000 output.wav
 
 FFmpeg can take input of raw audio types by specifying the type on the command line. For instance, to convert a "raw" audio type to a ".wav" file:

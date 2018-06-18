@@ -1,23 +1,24 @@
 <template>
-  <b-dropdown variant="link" size="lg" no-caret>
-    <template slot="button-content">
-      <i class="ion ion-android-radio-button-on"></i>
-      <span class="size-icon">
-                {{ size }}
-              </span>
-    </template>
-    <b-dropdown-item v-for="(sizeItem, index) in sizes" href="#" v-bind:key="index">
-      <label class="size-item"
-             v-on:click="change(sizeItem)">
-                <span class="size"
-                      v-bind:class="{'checked':size==sizeItem}"
-                      v-bind:style="{width: sizeItem + 'px', height: sizeItem + 'px'}"></span>
-      </label>
-    </b-dropdown-item>
-  </b-dropdown>
+  <button style="position: relative;display: -ms-inline-flexbox;display: inline-flex;vertical-align: middle;color: #323232;">
+    <i class="ion ion-android-radio-button-on" @click="show = !show">
+      <span class="size-icon">{{ size }}</span>
+    </i>
+    <ul v-click-outside="hide" v-if="show" class="popup-container">
+      <li class="item" v-for="(sizeItem, index) in sizes" href="#" v-bind:key="index" v-on:click="change(sizeItem)">
+        <label class="size-item">
+          <span class="size" v-bind:class="{'checked':size==sizeItem}" v-bind:style="{width: sizeItem + 'px', height: sizeItem + 'px'}"></span>
+        </label>
+      </li>
+    </ul>
+  </button>
 </template>
 <script>
+  import ClickOutside from 'vue-click-outside'
+
   export default {
+    directives: {
+      ClickOutside
+    },
     props: {
       sizes: {
         default () {
@@ -29,7 +30,8 @@
     },
     data () {
       return {
-        size: 0
+        size: 0,
+        show: false
       }
     },
     mounted () {
@@ -39,6 +41,9 @@
       change (sizeItem) {
         this.size = sizeItem
         this.$emit('input', sizeItem)
+      },
+      hide () {
+        this.show = false
       }
     }
   }
@@ -46,10 +51,30 @@
 <style lang="scss" scoped>
   $prim: rgb(0, 149, 255);
 
+  .popup-container {
+    position: absolute;
+    bottom: 50px;
+    background-color:#fff;
+    list-style-type: none;
+    padding: 0;
+    border: 1px solid rgba(0,0,0,.15);
+    border-radius: .25rem;
+
+    .item {
+      width: 80px;
+      padding-top: 5px;
+      padding-bottom: 5px;
+    }
+
+    .item:hover {
+      background-color: #efefef;
+      drop-shadow: .5rem .5rem 1rem .3rem #e23
+    }
+  }
+
   .size-icon, .color-icon {
     position: absolute;
     top: 10px;
-    right: 0;
     font-size: 6px;
     text-align: right;
   }

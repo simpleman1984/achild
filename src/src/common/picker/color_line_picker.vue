@@ -1,21 +1,23 @@
 <template>
-  <b-dropdown variant="link" size="lg" no-caret>
-    <template slot="button-content">
-      <i class="ion ion-android-color-palette"></i>
-      <span class="color-icon"
-            v-bind:style="{backgroundColor: color}">
-              </span>
-    </template>
-    <b-dropdown-item v-for="(colorItem, index)  in colors" v-bind:key="index" v-on:click="change(colorItem)">
-      <label class="color-item" >
-                <span v-bind:class="'color color-' + colorItem"
-                      v-bind:style="{backgroundColor: colorItem}"></span>
-      </label>
-    </b-dropdown-item>
-  </b-dropdown>
+  <button style="position: relative;display: -ms-inline-flexbox;display: inline-flex;vertical-align: middle;color: #323232;">
+    <i class="ion ion-android-color-palette" @click="show = !show">
+      <span class="color-icon" v-bind:style="{backgroundColor: color}"></span>
+    </i>
+    <ul v-click-outside="hide" v-if="show" class="popup-container">
+      <li class="item" v-for="(colorItem, index)  in colors" v-bind:key="index" v-on:click="change(colorItem)">
+        <label class="color-item" style="margin: auto;">
+              <span v-bind:class="'color color-' + colorItem" v-bind:style="{backgroundColor: colorItem}"></span>
+        </label>
+      </li>
+    </ul>
+  </button>
 </template>
 <script>
+  import ClickOutside from 'vue-click-outside'
   export default {
+    directives: {
+      ClickOutside
+    },
     props: {
       colors: {
         type: Array,
@@ -47,7 +49,8 @@
     },
     data () {
       return {
-        color: 0
+        color: 0,
+        show: false
       }
     },
     mounted () {
@@ -57,12 +60,36 @@
       change (sizeItem) {
         this.color = sizeItem
         this.$emit('input', sizeItem)
+      },
+      hide () {
+        this.show = false
       }
     }
   }
 </script>
 <style lang="scss" scoped>
   $prim: rgb(0, 149, 255);
+
+  .popup-container {
+    position: absolute;
+    bottom: 50px;
+    background-color:#fff;
+    list-style-type: none;
+    padding: 0;
+    border: 1px solid rgba(0,0,0,.15);
+    border-radius: .25rem;
+
+    .item {
+      width: 80px;
+      padding-top: 5px;
+      padding-bottom: 5px;
+    }
+
+    .item:hover {
+      background-color:#efefef;
+      drop-shadow: .5rem .5rem 1rem .3rem #e23
+    }
+  }
 
   .color-item {
     position: relative;

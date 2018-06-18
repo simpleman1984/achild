@@ -1,11 +1,10 @@
 <template>
-  <div class="btn-group" >
+  <button style="position: relative;display: -ms-inline-flexbox;display: inline-flex;vertical-align: middle;" v-bind:style="{color:actualColor}">
     <i class="ion ion-android-color-palette" @click="showColor = !showColor">
-      <span class="color-icon" v-bind:style="{backgroundColor: bgColor}">
-      </span>
+      <span class="color-icon" v-bind:style="{backgroundColor: bgColor}"></span>
     </i>
-    <chrome-picker v-click-outside="hide" v-model="color" v-if="showColor" style="position: absolute;bottom: 20px;"></chrome-picker>
-  </div>
+    <chrome-picker v-click-outside="hide" v-model="color" v-if="showColor" style="position: absolute;bottom: 50px;"></chrome-picker>
+  </button>
 </template>
 <script>
   import ClickOutside from 'vue-click-outside'
@@ -29,18 +28,20 @@
     data () {
       return {
         showColor: false,
-        color: '',
+        color: {},
+        actualColor: '#efefef',
         bgColor: ''
       }
     },
+    mounted () {
+      this.actualColor = this.value
+    },
     methods: {
-      mounted () {
-        this.color = this.value
-      },
       hide () {
         this.showColor = false
-        this.$emit('change', this.color.hex)
-        this.$emit('input', this.color.hex)
+        this.actualColor = this.color.hex
+        this.$emit('change', this.actualColor)
+        this.$emit('input', this.actualColor)
       }
     }
   }
