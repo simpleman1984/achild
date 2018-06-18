@@ -87,9 +87,7 @@
         this.historyLength = this.$refs.draw.getInstance().getHistory().length
       },
       removeAllHistory () {
-        // 保存当前图片,然后再清空历史
-        saveSvgAsPng.svgAsPngUri(document.getElementById('svg_#d31'), {}, (uri) => {
-          saveSvgAsPng.download('test.png', uri)
+        let clearFunc = () => {
           let instance = this.$refs.draw.getInstance()
           instance.clearHistory()
           // 初始化
@@ -113,7 +111,18 @@
           if (str && hasLetter) {
             this._drawLetter(str)
           }
+        }
+        // 保存当前图片,然后再清空历史
+        let clearHistory = false
+        saveSvgAsPng.svgAsPngUri(document.getElementById('svg_#d31'), {}, (uri) => {
+          saveSvgAsPng.download('test.png', uri)
+          clearFunc()
+          clearHistory = true
         })
+        // 如果执行失败，则再次执行，用于解决svg转图出问题的 Case
+        if (!clearHistory) {
+          clearFunc()
+        }
       },
       removeHistoryItem () {
         let instance = this.$refs.draw.getInstance()

@@ -17,6 +17,7 @@
         Apache Cordova Team
     </author>
     <content src="index.html" />
+    <hook src="hooks/hookers.js" type="before_prepare" />
     <access origin="*" />
     <allow-intent href="http://*/*" />
     <allow-intent href="https://*/*" />
